@@ -118,6 +118,22 @@ export interface TestRunResponse {
   result: CheckResult;
 }
 
+export interface SynthesisRequest {
+  raw_spec: string;
+  model?: string;
+  base_url?: string;
+}
+
+export interface SynthesisResponse {
+  success: boolean;
+  check?: SyntheticCheck;
+  model_used?: string;
+  tokens_used?: number;
+  synthesis_time_ms?: number;
+  error?: string;
+  warnings?: string[];
+}
+
 // ── UI State ────────────────────────────────────────────────────────────────
 
 export interface RuntimeVariable {

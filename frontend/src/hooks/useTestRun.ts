@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import type { CheckResult, SyntheticCheck } from "@/types/models";
-import { executeTestRun } from "@/lib/api";
+import { runDraft } from "@/lib/api";
 
 interface TestRunState {
   isRunning: boolean;
@@ -19,7 +19,7 @@ export function useTestRun() {
     setState({ isRunning: true, result: null, error: null });
 
     try {
-      const response = await executeTestRun({
+      const response = await runDraft({
         check,
         abort_on_failure: abortOnFailure,
       });

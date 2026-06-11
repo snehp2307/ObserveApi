@@ -163,12 +163,12 @@ class SyntheticExecutionEngine:
         extraction_logs = []
         if error is None and status_code is not None:
             # Try to parse body as JSON for extraction
-            body_for_extraction: Any = response_body_text
-            if response_body_text:
+            body_for_extraction: Any = raw_body
+            if raw_body:
                 try:
-                    body_for_extraction = json.loads(response_body_text)
+                    body_for_extraction = json.loads(raw_body)
                 except (json.JSONDecodeError, TypeError):
-                    body_for_extraction = response_body_text
+                    body_for_extraction = raw_body
 
             extraction_logs = ctx.extract(
                 response_body=body_for_extraction,
@@ -181,12 +181,12 @@ class SyntheticExecutionEngine:
         # --- Phase 4: Evaluate assertions ---
         assertion_results = []
         if error is None and status_code is not None:
-            body_for_assertion: Any = response_body_text
-            if response_body_text:
+            body_for_assertion: Any = raw_body
+            if raw_body:
                 try:
-                    body_for_assertion = json.loads(response_body_text)
+                    body_for_assertion = json.loads(raw_body)
                 except (json.JSONDecodeError, TypeError):
-                    body_for_assertion = response_body_text
+                    body_for_assertion = raw_body
 
             for assertion in step.assertions:
                 result = self._evaluate_assertion(
@@ -246,7 +246,14 @@ class SyntheticExecutionEngine:
             if assertion.target == AssertionTarget.STATUS_CODE:
                 actual_value = str(status_code)
             elif assertion.target == AssertionTarget.HEADER:
-                header_name = assertion.header_name or assertion.expected
+                if not assertion.header_name:
+                    return AssertionResult(
+                        assertion=assertion,
+                        actual_value=None,
+                        passed=False,
+                        message="Header name is required for header assertions",
+                    )
+                header_name = assertion.header_name
                 actual_value = response_headers.get(header_name)
                 if actual_value is None:
                     # Case-insensitive fallback
